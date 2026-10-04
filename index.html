@@ -1,0 +1,952 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex">
+<title>[테스트] isSAFE 제1차 시연회 — 현장 참여</title>
+<style>
+:root{
+  --bg:#eef1f6; --surface:#ffffff; --line:#dde3ec; --line-2:#eaeef4; --field:#fcfdff;
+  --ink:#16202e; --ink-2:#44546a; --ink-3:#7b8798;
+  --accent:#003379; --btn-bg:#003379; --btn-fg:#ffffff;
+  --hdr-1:#003379; --hdr-2:#00265c; --hdr-fg:#ffffff; --hdr-sub:#b7c9e6; --hdr-mark:#8ec5ff;
+  --adm-1:#1f2937; --adm-2:#111827;
+  --track:#e4e9f1; --picked:#f4f7fd;
+  --chip-bg:#eef1f6; --chip-fg:#7b8798; --chip-on:#ffffff;
+  --live-bg:#ffeceb; --live-fg:#b3261e;
+  --good-bg:#e6f4ea; --good-fg:#1d5c33;
+  --warn-bg:#fff8e6; --warn-line:#f2e2b8; --warn-fg:#7a5a12;
+  --info-bg:#e8edf6; --info-fg:#3b4b66;
+  --danger:#c0392b;
+  --o1:#2F6BE0; --o2:#00A3A8; --o3:#C2611A; --o4:#8A4BC4;
+  --shadow:0 1px 2px rgba(16,32,58,.06), 0 8px 24px rgba(16,32,58,.07);
+  --radius:14px;
+  color-scheme:light;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0e141f; --surface:#171f2c; --line:#2a3546; --line-2:#222c3b; --field:#131b27;
+    --ink:#e8edf5; --ink-2:#a9b6c8; --ink-3:#7d8b9e;
+    --accent:#8ec5ff; --btn-bg:#2f6be0; --btn-fg:#ffffff;
+    --hdr-1:#132540; --hdr-2:#0c1a2e; --hdr-fg:#eaf1fb; --hdr-sub:#8ea6c8; --hdr-mark:#8ec5ff;
+    --adm-1:#232d3c; --adm-2:#161d28;
+    --track:#26313f; --picked:#1b2740;
+    --chip-bg:#232d3c; --chip-fg:#93a1b4; --chip-on:#0e141f;
+    --live-bg:#3a1b19; --live-fg:#ff9a90;
+    --good-bg:#12331f; --good-fg:#8fd6a8;
+    --warn-bg:#332a12; --warn-line:#5c4a1c; --warn-fg:#e3c579;
+    --info-bg:#1b2533; --info-fg:#b9c6d8;
+    --danger:#ff8a7a;
+    --o1:#6285F2; --o2:#0C9FA4; --o3:#C97A1E; --o4:#A96FE2;
+    --shadow:0 1px 2px rgba(0,0,0,.3), 0 8px 24px rgba(0,0,0,.28);
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0e141f; --surface:#171f2c; --line:#2a3546; --line-2:#222c3b; --field:#131b27;
+  --ink:#e8edf5; --ink-2:#a9b6c8; --ink-3:#7d8b9e;
+  --accent:#8ec5ff; --btn-bg:#2f6be0; --btn-fg:#ffffff;
+  --hdr-1:#132540; --hdr-2:#0c1a2e; --hdr-fg:#eaf1fb; --hdr-sub:#8ea6c8; --hdr-mark:#8ec5ff;
+  --adm-1:#232d3c; --adm-2:#161d28;
+  --track:#26313f; --picked:#1b2740;
+  --chip-bg:#232d3c; --chip-fg:#93a1b4; --chip-on:#0e141f;
+  --live-bg:#3a1b19; --live-fg:#ff9a90;
+  --good-bg:#12331f; --good-fg:#8fd6a8;
+  --warn-bg:#332a12; --warn-line:#5c4a1c; --warn-fg:#e3c579;
+  --info-bg:#1b2533; --info-fg:#b9c6d8;
+  --danger:#ff8a7a;
+  --o1:#6285F2; --o2:#0C9FA4; --o3:#C97A1E; --o4:#A96FE2;
+  --shadow:0 1px 2px rgba(0,0,0,.3), 0 8px 24px rgba(0,0,0,.28);
+  color-scheme:dark;
+}
+
+*{box-sizing:border-box}
+html,body{height:100%}
+body{
+  margin:0; background:var(--bg); color:var(--ink);
+  font-family:system-ui,-apple-system,"Apple SD Gothic Neo","Malgun Gothic","Noto Sans KR",sans-serif;
+  font-size:15px; line-height:1.55; -webkit-font-smoothing:antialiased;
+  padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+}
+button{font-family:inherit; font-size:inherit; cursor:pointer}
+:focus-visible{outline:2px solid var(--o1); outline-offset:2px}
+@media (prefers-reduced-motion: reduce){*{animation:none!important; transition:none!important}}
+[hidden]{display:none!important}
+
+.app{max-width:520px; margin:0 auto; min-height:100%; padding-bottom:48px}
+
+/* header */
+.hdr{
+  position:sticky; top:env(safe-area-inset-top,0px); z-index:20;
+  background:linear-gradient(180deg,var(--hdr-1) 0%,var(--hdr-2) 100%);
+  color:var(--hdr-fg); padding:14px 16px; display:flex; align-items:center; gap:10px;
+}
+.adm .hdr{background:linear-gradient(180deg,var(--adm-1) 0%,var(--adm-2) 100%)}
+.hdr .mark{font-weight:800; letter-spacing:-.02em; font-size:17px; cursor:default; -webkit-user-select:none; user-select:none}
+.hdr .mark em{font-style:normal; color:var(--hdr-mark)}
+.hdr .sub{font-size:11.5px; color:var(--hdr-sub); margin-top:1px}
+.hdr .spacer{flex:1}
+.mybadge{background:rgba(255,255,255,.14); border:1px solid rgba(255,255,255,.22); color:var(--hdr-fg);
+  border-radius:999px; padding:6px 12px; font-size:12px; font-weight:600; white-space:nowrap; font-family:inherit}
+.adm-tag{background:#f59e0b; color:#1f2937; font-size:11px; font-weight:800; padding:3px 8px; border-radius:6px}
+.test-tag{background:#e0392b; color:#fff; font-size:11px; font-weight:800; padding:3px 8px; border-radius:6px}
+
+/* generic */
+.wrap{padding-block:16px; padding-inline:16px}
+.card{background:var(--surface); border-radius:var(--radius); box-shadow:var(--shadow); padding:16px; margin-bottom:14px}
+.card-t{font-size:13px; font-weight:700; color:var(--accent); margin:0 0 4px}
+.muted{color:var(--ink-3); font-size:12.5px; line-height:1.5}
+.hr{height:1px; background:var(--line-2); margin:16px 0}
+.btn{border:0; border-radius:10px; background:var(--btn-bg); color:var(--btn-fg); font-weight:700; padding:12px 16px; width:100%}
+.btn:disabled{background:var(--line); color:var(--ink-3)}
+.btn-ghost{background:var(--surface); color:var(--accent); border:1.5px solid var(--line)}
+
+/* onboarding */
+.onb{padding-block:34px 20px; padding-inline:20px; text-align:center; max-width:520px; margin:0 auto}
+.onb .logo{font-size:30px; font-weight:800; letter-spacing:-.03em; color:var(--accent); cursor:default; -webkit-user-select:none; user-select:none}
+.onb .logo em{font-style:normal; color:var(--o1)}
+.onb .tag{font-size:13px; color:var(--ink-2); margin-top:6px}
+.onb .ask{font-size:16px; font-weight:700; margin:30px 0 4px; text-wrap:balance}
+.onb .note{font-size:12.5px; color:var(--ink-3); margin-bottom:18px}
+.affs{display:grid; gap:9px}
+.aff{background:var(--surface); border:1.5px solid var(--line); border-radius:12px; padding:16px;
+  text-align:left; font-weight:700; font-size:16px; color:var(--ink); display:flex; align-items:center; gap:11px}
+.aff .dot{width:9px; height:9px; border-radius:50%; flex:none}
+.privacy{margin-top:20px; background:var(--info-bg); color:var(--info-fg); border-radius:12px;
+  padding:13px 14px; font-size:12.5px; text-align:left; line-height:1.6}
+
+/* survey call-out */
+.survey{display:block; text-decoration:none; margin-bottom:14px; padding:16px; border-radius:var(--radius);
+  background:var(--btn-bg); color:var(--btn-fg); box-shadow:var(--shadow)}
+.survey .sv-t{font-size:15px; font-weight:800; letter-spacing:-.01em}
+.survey .sv-d{font-size:12.5px; line-height:1.55; opacity:.85; margin-top:4px}
+.survey .sv-go{font-size:13px; font-weight:700; margin-top:10px}
+
+/* survey popup */
+.modal{position:fixed; inset:0; z-index:50; background:rgba(9,20,40,.6);
+  display:flex; align-items:center; justify-content:center; padding:20px}
+.mbox{width:100%; max-width:360px; background:var(--surface); border-radius:18px; padding:22px 20px;
+  box-shadow:0 20px 50px rgba(0,0,0,.3); text-align:center; animation:pop .25s cubic-bezier(.2,.8,.3,1)}
+@keyframes pop{from{transform:scale(.94); opacity:0} to{transform:none; opacity:1}}
+.mbox .mt{font-size:18px; font-weight:800; letter-spacing:-.02em; text-wrap:balance}
+.mbox .md{font-size:13px; color:var(--ink-2); line-height:1.6; margin:8px 0 18px}
+.mbox .btn{display:block; text-decoration:none; text-align:center}
+
+/* question board */
+.compose textarea{width:100%; border:1.5px solid var(--line); border-radius:11px; padding:12px;
+  font-family:inherit; font-size:15px; line-height:1.5; resize:none; color:var(--ink); background:var(--field)}
+.compose textarea:focus{outline:none; border-color:var(--o1)}
+.compose .row{display:flex; align-items:center; gap:10px; margin-top:10px}
+.compose .row .muted{flex:1; min-width:0}
+.compose .btn{width:auto; padding:10px 20px}
+.qhead{display:flex; align-items:baseline; gap:8px; margin:4px 2px 10px; flex-wrap:wrap}
+.qhead h2{font-size:14px; font-weight:800; color:var(--accent); margin:0}
+.qhead .count{font-size:12px; color:var(--ink-3); font-weight:600}
+.q{background:var(--surface); border-radius:12px; box-shadow:var(--shadow); padding:13px 14px; margin-bottom:9px}
+.q .meta{display:flex; align-items:center; gap:7px; margin-bottom:6px; flex-wrap:wrap}
+.chip{font-size:11px; font-weight:700; padding:3px 8px; border-radius:999px; white-space:nowrap}
+.chip-aff{color:var(--chip-on)}
+.chip-live{background:var(--live-bg); color:var(--live-fg)}
+.chip-pre{background:var(--chip-bg); color:var(--chip-fg)}
+.q .time{font-size:11px; color:var(--ink-3); margin-left:auto; font-variant-numeric:tabular-nums}
+.q .body{font-size:14.5px; line-height:1.6; white-space:pre-wrap; word-break:break-word; min-width:0}
+.q.mine{border-left:3px solid var(--o1)}
+.empty{text-align:center; color:var(--ink-3); font-size:13px; padding:26px 10px}
+
+.chip-done{background:var(--good-bg); color:var(--good-fg)}
+.ans{margin-top:10px; padding:11px 12px; background:var(--info-bg); color:var(--info-fg);
+  border-radius:10px; font-size:14px; line-height:1.6; white-space:pre-wrap; word-break:break-word}
+.ans .al{display:block; font-size:11px; font-weight:800; letter-spacing:.04em; color:var(--accent); margin-bottom:3px}
+.ansin{width:100%; margin-top:10px; border:1.5px solid var(--line); border-radius:11px; padding:11px;
+  font-family:inherit; font-size:14.5px; line-height:1.5; resize:vertical; color:var(--ink); background:var(--field)}
+.ansin:focus{outline:none; border-color:var(--o1)}
+
+.tabs{display:flex; gap:6px; margin-bottom:14px}
+.tab{flex:1; border:1.5px solid var(--line); background:var(--surface); color:var(--ink-3);
+  border-radius:10px; padding:10px; font-weight:700; font-size:13.5px}
+.tab.on{background:var(--btn-bg); color:var(--btn-fg); border-color:var(--btn-bg)}
+
+.pollrow{display:block; width:100%; text-align:left; background:var(--surface); border:0;
+  border-radius:12px; box-shadow:var(--shadow); padding:13px 14px; margin-bottom:9px; color:var(--ink)}
+.pollrow .pt{display:block; font-size:14px; font-weight:700; line-height:1.45; word-break:keep-all}
+.pollrow .pb{display:flex; align-items:center; gap:8px; margin-top:8px}
+.pollrow .go{margin-left:auto; font-size:12.5px; font-weight:700; color:var(--accent)}
+
+/* poll sheet */
+.overlay{position:fixed; inset:0; z-index:40; background:rgba(9,20,40,.55); display:flex; align-items:flex-end; justify-content:center}
+.sheet{width:100%; max-width:520px; background:var(--bg); border-radius:20px 20px 0 0; max-height:92dvh;
+  overflow-y:auto; animation:rise .28s cubic-bezier(.2,.8,.3,1);
+  padding-bottom:calc(20px + env(safe-area-inset-bottom,0px))}
+@keyframes rise{from{transform:translateY(24px); opacity:0} to{transform:none; opacity:1}}
+.sheet .grip{width:38px; height:4px; background:var(--line); border-radius:2px; margin:9px auto 0}
+.sheet .top{padding:14px 18px 0; display:flex; align-items:center; gap:8px}
+.live-dot{width:7px; height:7px; border-radius:50%; background:var(--live-fg); animation:pulse 1.4s infinite}
+@keyframes pulse{0%,100%{opacity:1} 50%{opacity:.25}}
+.live-label{font-size:11.5px; font-weight:800; color:var(--live-fg); letter-spacing:.04em}
+.closed-label{font-size:11.5px; font-weight:800; color:var(--ink-3); letter-spacing:.04em}
+.sheet h3{font-size:19px; line-height:1.45; margin:10px 18px 4px; letter-spacing:-.02em; text-wrap:balance}
+.sheet .qnote{font-size:12.5px; color:var(--ink-3); margin:0 18px 14px}
+.opts{display:grid; gap:9px; padding:0 18px}
+.opt{background:var(--surface); border:1.5px solid var(--line); border-radius:12px; padding:14px 15px;
+  text-align:left; font-weight:600; color:var(--ink); display:flex; align-items:center; gap:11px; line-height:1.45}
+.opt .sw{width:11px; height:11px; border-radius:3px; flex:none}
+.done-note{margin:14px 18px 0; background:var(--good-bg); color:var(--good-fg); border-radius:10px;
+  padding:10px 13px; font-size:12.5px; font-weight:600}
+
+/* results */
+.res{padding:4px 18px 18px}
+.res-sec{margin-top:18px}
+.res-sec h4{font-size:12px; font-weight:800; color:var(--accent); margin:0 0 2px; letter-spacing:.02em}
+.res-sec .sh{font-size:11.5px; color:var(--ink-3); margin:0 0 11px}
+.gcards{display:grid; grid-template-columns:1fr 1fr; gap:9px}
+.gcard{background:var(--surface); border-radius:12px; padding:12px 13px; box-shadow:var(--shadow); min-width:0}
+.gcard .gh{font-size:11.5px; font-weight:700; color:var(--ink-3); letter-spacing:.02em}
+.gcard .ga{font-size:19px; font-weight:800; line-height:1.25; margin-top:3px; letter-spacing:-.02em; word-break:keep-all}
+.gcard .gp{font-size:12.5px; font-weight:700; color:var(--ink-2); margin-top:2px; font-variant-numeric:tabular-nums}
+.gcard .none{font-size:15px; font-weight:600; color:var(--ink-3); margin-top:3px}
+.rrow{margin-bottom:11px}
+.rrow .lbl{display:flex; align-items:center; gap:7px; margin-bottom:5px}
+.rrow .sw{width:10px; height:10px; border-radius:3px; flex:none}
+.rrow .nm{font-size:13px; font-weight:600; flex:1; min-width:0; line-height:1.35}
+.rrow .val{font-size:12.5px; font-weight:700; color:var(--ink-2); white-space:nowrap; font-variant-numeric:tabular-nums}
+.rrow .val b{font-size:14px; color:var(--ink)}
+.track{height:10px; background:var(--track); border-radius:5px; overflow:hidden}
+.fill{height:100%; border-radius:5px; transition:width .5s cubic-bezier(.2,.8,.3,1)}
+.reveal-note{margin-top:14px; background:var(--warn-bg); border:1px solid var(--warn-line); color:var(--warn-fg);
+  border-radius:10px; padding:10px 13px; font-size:12px; line-height:1.55}
+.reveal-note.done{background:var(--info-bg); border-color:var(--line); color:var(--info-fg)}
+.sheet .btn{width:calc(100% - 36px); margin:16px 18px 0}
+
+/* admin */
+.stat{display:flex; gap:10px; margin-bottom:14px}
+.stat div{flex:1; min-width:0; background:var(--surface); border-radius:12px; box-shadow:var(--shadow); padding:12px; text-align:center}
+.stat b{display:block; font-size:22px; font-weight:800; color:var(--accent); line-height:1.2; font-variant-numeric:tabular-nums}
+.stat span{font-size:11.5px; color:var(--ink-3)}
+.pcard{background:var(--surface); border-radius:12px; box-shadow:var(--shadow); padding:14px; margin-bottom:10px}
+.pcard .pt{font-size:14px; font-weight:700; line-height:1.45; margin-bottom:8px}
+.prow{display:flex; align-items:center; gap:8px; flex-wrap:wrap}
+.st{font-size:11px; font-weight:800; padding:4px 9px; border-radius:999px}
+.st-wait{background:var(--chip-bg); color:var(--chip-fg)}
+.st-open{background:var(--live-bg); color:var(--live-fg)}
+.st-closed{background:var(--info-bg); color:var(--info-fg)}
+.prow .sp{flex:1}
+.mini{border:1.5px solid var(--line); background:var(--surface); color:var(--accent);
+  border-radius:9px; padding:8px 14px; font-weight:700; font-size:13px}
+.mini.primary{background:var(--btn-bg); color:var(--btn-fg); border-color:var(--btn-bg)}
+.mini.danger{color:var(--danger); border-color:var(--danger)}
+.mini.armed{background:var(--danger); color:#fff; border-color:var(--danger)}
+.dz{background:var(--surface); border-radius:12px; box-shadow:var(--shadow); padding:14px; display:grid; gap:9px}
+.dz .dzrow{display:flex; align-items:center; gap:10px}
+.dz .dzrow span{flex:1; min-width:0; font-size:13px}
+
+/* status / toast */
+.conn{position:fixed; left:50%; transform:translateX(-50%); bottom:calc(12px + env(safe-area-inset-bottom,0px));
+  z-index:70; background:var(--danger); color:#fff; padding:9px 15px; border-radius:999px;
+  font-size:12.5px; font-weight:700; box-shadow:0 6px 20px rgba(0,0,0,.25)}
+.toast{position:fixed; left:50%; bottom:70px; transform:translateX(-50%); z-index:99;
+  background:#111827; color:#fff; padding:10px 16px; border-radius:10px; font-size:13px;
+  box-shadow:0 8px 24px rgba(0,0,0,.35); max-width:calc(100% - 32px); text-align:center}
+</style>
+</head>
+<body>
+<div class="app" id="app"></div>
+<div class="conn" id="conn" hidden>연결 끊김 — 다시 시도 중</div>
+
+<script>
+/* ============================================================
+   isSAFE 제1차 시연회 — 현장 참여 플랫폼
+   Firebase Realtime Database REST + 스트리밍. SDK 불러오지 않음.
+   데이터는 모두 live/ 아래에 둔다 (스트림을 하나만 열기 위함).
+     live/questions/{id} = {aff, text, t}
+     live/polls/{pollId}/status = 'wait' | 'open' | 'closed'
+     live/polls/{pollId}/votes/{clientId} = {aff, opt}
+     live/meta/survey = true | false
+   ============================================================ */
+
+const DB_URL = 'https://issafe-testlive-default-rtdb.asia-southeast1.firebasedatabase.app/';
+const IS_TEST = true;   // 테스트 사본 표시
+const SURVEY_URL = 'https://naver.me/Gow7xnOp';
+const EVENT_START = Date.parse('2026-10-08T11:00:00+09:00');
+
+const AFFS = [
+  {id:'yard', name:'조선소',        color:'var(--o1)'},
+  {id:'navy', name:'해군',          color:'var(--o2)'},
+  {id:'ind',  name:'산업체',        color:'var(--o3)'},
+  {id:'res',  name:'연구기관·학계', color:'var(--o4)'},
+];
+const affOf = id => AFFS.find(a=>a.id===id) || AFFS[3];
+
+/* 문항을 바꿀 때는 id도 함께 바꾸거나 DB의 해당 경로를 비울 것 (리허설 표가 섞인다) */
+const POLLS = [
+  { id:'q1',
+    title:'오늘 여기까지 오시는 데 얼마나 걸리셨습니까?',
+    note:'',
+    options:['1시간 이내','1~2시간','2시간 이상'] },
+  { id:'q2',
+    title:'함정이 피격당했을 때 가장 우선시되어야 하는 기능은 무엇이라고 보십니까?',
+    note:'정답이 있는 문항은 아닙니다.',
+    options:['전력','추진','전투체계'] },
+  { id:'q3',
+    title:'기계식 추진과 전기추진(장비만 교체) 중, 같은 피격에서 생존성이 더 좋을 쪽은?',
+    note:'잠시 후 해석 결과로 함께 확인하겠습니다.',
+    options:['기계식','전기추진','비슷하다'] },
+  // 4번은 운영상 마감하지 않는다 (소속명을 공개하지 않고 그룹 A~D 로만 둔다)
+  { id:'q4',
+    title:'isSAFE를 실제로 쓰게 된다면 어떤 방식이 맞겠습니까?',
+    note:'2단계 개발 계획에 반영할 예정입니다.',
+    options:['기관 내부에 설치해 사용','필요한 모듈만 떼어 기존 체계에 연계','기계연에 의뢰하거나 공동 과제로 활용'] },
+];
+const OPT_COLORS = ['var(--o1)','var(--o2)','var(--o3)','var(--o4)'];
+
+/* ---------- 로컬 저장 ---------- */
+const LS = {
+  get(k, d){ try{ const v = localStorage.getItem('issafe.test.'+k); return v===null ? d : JSON.parse(v); }catch(e){ return d; } },
+  set(k, v){ try{ localStorage.setItem('issafe.test.'+k, JSON.stringify(v)); }catch(e){} },
+  del(k){ try{ localStorage.removeItem('issafe.test.'+k); }catch(e){} },
+};
+function clientId(){
+  let id = LS.get('cid', null);
+  if(!id){ id = 'c' + Math.random().toString(36).slice(2,10) + Date.now().toString(36).slice(-4); LS.set('cid', id); }
+  return id;
+}
+
+function hashIsAdmin(){ try{ return location.hash === '#admin'; }catch(e){ return false; } }
+
+// 소속 목록이 바뀌었을 수 있으므로, 저장된 값이 지금 목록에 없으면 다시 고르게 한다
+const savedAff = AFFS.some(a=>a.id === LS.get('aff', null)) ? LS.get('aff', null) : null;
+
+const state = {
+  screen: savedAff ? 'board' : 'onboard',
+  myAff: savedAff,
+  myQ: LS.get('myq', []),
+  cid: clientId(),
+  db: {},                 // live/ 의 사본
+  seen: LS.get('seen', {}),   // 자동으로 띄운 적 있는 문항
+  openSheet: null,        // 지금 화면에 띄운 문항 id
+  isAdmin: hashIsAdmin(), armed: null,
+  adminTab: 'ops', editing: null, dzOpen: false, draft: {},
+};
+
+/* ---------- 유틸 ---------- */
+const esc = s => String(s).replace(/[&<>"]/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const KST = new Intl.DateTimeFormat('ko-KR',{hour:'2-digit',minute:'2-digit',hour12:false,timeZone:'Asia/Seoul'});
+const hhmm = t => KST.format(new Date(t));
+const pct = (n,d) => d ? Math.round(n/d*100) : 0;
+const LETTERS = ['A','B','C','D'];
+function groupMap(pollId){
+  let seed = 0;
+  for(const ch of pollId) seed = (seed*31 + ch.charCodeAt(0)) >>> 0;
+  const order = AFFS.map(a=>a.id);
+  for(let i=order.length-1;i>0;i--){
+    seed = (seed*1103515245 + 12345) >>> 0;
+    const j = seed % (i+1);
+    [order[i],order[j]] = [order[j],order[i]];
+  }
+  const m = {}; order.forEach((id,idx)=> m[id] = LETTERS[idx]); return m;
+}
+
+/* ---------- DB 접근 ---------- */
+const url = path => DB_URL.replace(/\/$/,'') + '/' + path + '.json';
+async function dbPost(path, body){ return send('POST', path, body); }
+async function dbPut(path, body){ return send('PUT', path, body); }
+async function dbDel(path){ return send('DELETE', path, null); }
+async function send(method, path, body){
+  try{
+    const r = await fetch(url(path), {
+      method,
+      headers: body===null ? undefined : {'Content-Type':'application/json'},
+      body: body===null ? undefined : JSON.stringify(body),
+    });
+    if(!r.ok) throw new Error(await r.text());
+    return true;
+  }catch(e){
+    toast('저장하지 못했습니다. 연결을 확인해 주세요.');
+    console.error(method, path, e);
+    return false;
+  }
+}
+
+/* 경로를 따라 값 써넣기 (스트림 이벤트 반영용) */
+function applyPut(path, data){
+  const parts = path.split('/').filter(Boolean);
+  if(!parts.length){ state.db = data || {}; return; }
+  let node = state.db;
+  for(let i=0;i<parts.length-1;i++){
+    if(typeof node[parts[i]] !== 'object' || node[parts[i]] === null) node[parts[i]] = {};
+    node = node[parts[i]];
+  }
+  const last = parts[parts.length-1];
+  if(data === null) delete node[last]; else node[last] = data;
+}
+function applyPatch(path, data){
+  const parts = path.split('/').filter(Boolean);
+  let node = state.db;
+  for(const p of parts){
+    if(typeof node[p] !== 'object' || node[p] === null) node[p] = {};
+    node = node[p];
+  }
+  Object.keys(data || {}).forEach(k=>{ if(data[k]===null) delete node[k]; else node[k] = data[k]; });
+}
+
+let es = null, fails = 0, polling = null;
+function connect(){
+  if(polling) return;                       // 이미 대체 경로로 돌고 있으면 그대로 둔다
+  try{ if(es) es.close(); }catch(e){}
+  try{ es = new EventSource(url('live')); }catch(e){ startPolling(); return; }
+  es.addEventListener('put', ev=>{
+    const m = JSON.parse(ev.data); applyPut(m.path, m.data); online(true); render();
+  });
+  es.addEventListener('patch', ev=>{
+    const m = JSON.parse(ev.data); applyPatch(m.path, m.data); online(true); render();
+  });
+  es.onopen = ()=>{ fails = 0; online(true); };
+  es.onerror = ()=>{
+    online(false);
+    fails++;
+    // 스트리밍이 두 번 실패하면 주기적으로 읽어오는 방식으로 바꾼다
+    if(fails >= 2){ try{ es.close(); }catch(e){} startPolling(); return; }
+    setTimeout(connect, 1500);
+  };
+}
+function startPolling(){
+  if(polling) return;
+  const tick = async ()=>{
+    try{
+      const r = await fetch(url('live'), {cache:'no-store'});
+      if(!r.ok) throw new Error('read failed');
+      const data = await r.json();
+      const next = JSON.stringify(data || {});
+      online(true);
+      if(next !== lastSnap){ lastSnap = next; state.db = data || {}; render(); }
+    }catch(e){ online(false); }
+  };
+  tick();
+  polling = setInterval(tick, 2500);
+}
+let lastSnap = '';
+function online(ok){ const el = document.getElementById('conn'); if(el) el.hidden = !!ok; }
+
+/* ---------- 데이터 읽기 ---------- */
+const questions = () => {
+  const q = state.db.questions || {};
+  return Object.keys(q).map(k=>({ id:k, ...q[k] }))
+    .filter(x=> x && typeof x.text === 'string')
+    .sort((a,b)=> (b.t||0) - (a.t||0));
+};
+const pollStatus = id => (state.db.polls && state.db.polls[id] && state.db.polls[id].status) || 'wait';
+const pollVotes = p => {
+  const v = (state.db.polls && state.db.polls[p.id] && state.db.polls[p.id].votes) || {};
+  return Object.keys(v).map(k=>v[k])
+    .filter(x=> x && Number.isInteger(x.opt) && x.opt >= 0 && x.opt < p.options.length);
+};
+const myVote = id => {
+  const v = state.db.polls && state.db.polls[id] && state.db.polls[id].votes;
+  return v && v[state.cid] ? v[state.cid].opt : null;
+};
+const surveyOpen = () => !!(state.db.meta && state.db.meta.survey);
+const surveyAt = () => (state.db.meta && state.db.meta.surveyAt) || 0;
+// 관리자가 설문을 다시 켜면 닫았던 사람에게도 한 번 더 뜬다
+const showSurveyPopup = () => surveyOpen() && !state.openSheet && LS.get('svdone', 0) !== surveyAt();
+function dismissSurvey(){ LS.set('svdone', surveyAt()); render(); }
+// 질문판 안내 문구: 행사 전('pre')과 시연 중('live')을 관리자가 전환한다
+const phase = () => ((state.db.meta && state.db.meta.phase) === 'live') ? 'live' : 'pre';
+const COMPOSE_T = {
+  pre:  'isSAFE에 대해 궁금한 점을 남겨주세요',
+  live: '시연을 보시다 궁금한 점이 생기면 남겨주세요',
+};
+
+/* ============================ RENDER ============================ */
+function render(){
+  if(!state.isAdmin && state.screen==='admin') state.screen = 'board';
+
+  // 열린 문항이 생기면 자동으로 띄운다 (한 문항당 한 번만)
+  const open = POLLS.find(p=> pollStatus(p.id) === 'open');
+  if(open && state.seen[open.id] !== 'open'){
+    state.openSheet = open.id; state.seen[open.id] = 'open'; LS.set('seen', state.seen);
+  }
+  // 마감되면 결과를 한 번 띄운다
+  const closed = POLLS.find(p=> pollStatus(p.id) === 'closed' && state.seen[p.id] === 'open');
+  if(closed){ state.openSheet = closed.id; state.seen[closed.id] = 'closed'; LS.set('seen', state.seen); }
+
+  // 작성 중인 질문이 날아가지 않도록 입력 상태를 보존한다
+  const ta = document.getElementById('qin');
+  const keep = ta ? { v: ta.value, s: ta.selectionStart, e: ta.selectionEnd, f: document.activeElement === ta } : null;
+
+  const app = document.getElementById('app');
+  app.className = 'app' + (state.screen==='admin' ? ' adm' : '');
+  app.innerHTML = state.screen==='onboard' ? viewOnboard()
+                : state.screen==='admin'   ? viewAdmin()
+                :                            viewBoard();
+
+  if(keep && keep.v){
+    const el = document.getElementById('qin');
+    if(el){
+      el.value = keep.v;
+      document.getElementById('cnt').textContent = `${keep.v.length} / 300`;
+      document.getElementById('qbtn').disabled = keep.v.trim().length < 2;
+      if(keep.f){ el.focus(); try{ el.setSelectionRange(keep.s, keep.e); }catch(e){} }
+    }
+  }
+
+  const old = document.getElementById('ov'); if(old) old.remove();
+  if(state.screen==='board' && state.openSheet){
+    document.body.insertAdjacentHTML('beforeend', viewPoll(state.openSheet));
+  }
+
+  const oldm = document.getElementById('mo'); if(oldm) oldm.remove();
+  if(state.screen==='board' && showSurveyPopup()){
+    document.body.insertAdjacentHTML('beforeend', viewSurveyPopup());
+  }
+}
+
+function viewSurveyPopup(){
+  return `<div class="modal" id="mo">
+    <div class="mbox">
+      <div class="mt">설문에 의견을 남겨주세요</div>
+      <div class="md">주시는 의견은 모두 읽고 2단계(2027~2028) 개발 계획에 반영하겠습니다.<br>필수 입력은 소속뿐입니다.</div>
+      <a class="btn" href="${SURVEY_URL}" target="_blank" rel="noopener" onclick="dismissSurvey()">설문 열기</a>
+      <button class="btn btn-ghost" style="margin-top:8px" onclick="dismissSurvey()">나중에 하기</button>
+    </div>
+  </div>`;
+}
+
+function header(right){
+  return `<div class="hdr">
+    <div>
+      <div class="mark" onclick="tapLogo()">is<em>SAFE</em> <span class="test-tag">테스트</span>${state.screen==='admin'?' <span class="adm-tag">관리자</span>':''}</div>
+      <div class="sub">제1차 시연회 · 2026.10.08</div>
+    </div>
+    <div class="spacer"></div>${right||''}
+  </div>`;
+}
+
+/* ---------- 소속 선택 ---------- */
+function viewOnboard(){
+  return `<div class="onb">
+    <div class="logo" onclick="tapLogo()">is<em>SAFE</em></div>
+    <div class="tag">함정 생존성 통합 설계 프레임워크 · 제1차 시연회</div>
+    <div class="ask">어느 쪽에서 오셨나요?</div>
+    <div class="note">집계에만 사용되며, 화면에는 소속만 표시됩니다.</div>
+    <div class="affs">
+      ${AFFS.map(a=>`<button class="aff" onclick="pickAff('${a.id}')">
+        <span class="dot" style="background:${a.color}"></span>
+        <span>${a.name}</span></button>`).join('')}
+    </div>
+    <div class="privacy">
+      이름과 연락처는 받지 않습니다. 올리신 질문은 소속과 함께 모든 참석자에게 공개되며,
+      시간 관계상 현장에서 답변드리지 못한 질문은 행사 후 정리하여 회신드립니다.
+    </div>
+    ${state.myAff ? `<button class="btn btn-ghost" style="margin-top:14px" onclick="cancelAff()">취소</button>` : ''}
+  </div>`;
+}
+function changeAff(){ state.screen = 'onboard'; render(); }
+function cancelAff(){ state.screen = 'board'; render(); }
+
+async function pickAff(id){
+  const before = state.myAff;
+  state.myAff = id; LS.set('aff', id);
+  state.screen = 'board'; render();
+  // 소속을 바꾸면 이미 낸 표의 소속도 함께 고친다 (집계가 어긋나지 않도록)
+  if(before && before !== id){
+    for(const p of POLLS){
+      const v = state.db.polls && state.db.polls[p.id] && state.db.polls[p.id].votes;
+      if(v && v[state.cid]) await dbPut(`live/polls/${p.id}/votes/${state.cid}`, { aff:id, opt:v[state.cid].opt });
+    }
+  }
+}
+
+/* ---------- 질문판 ---------- */
+function viewBoard(){
+  const me = affOf(state.myAff);
+  const qs = questions();
+  const pre = qs.filter(q=> (q.t||0) < EVENT_START).length;
+  return `${header(`<button class="mybadge" onclick="changeAff()">${me.name} <span style="opacity:.6">변경</span></button>`)}
+  <div class="wrap">
+    ${surveyOpen() ? `
+    <a class="survey" href="${SURVEY_URL}" target="_blank" rel="noopener">
+      <div class="sv-t">설문에 의견을 남겨주세요</div>
+      <div class="sv-d">주시는 의견은 모두 읽고 2단계 개발 계획에 반영하겠습니다. 필수 입력은 소속뿐입니다.</div>
+      <div class="sv-go">설문 열기 →</div>
+    </a>` : ''}
+
+    <div class="card compose">
+      <p class="card-t">${COMPOSE_T[phase()]}</p>
+      <p class="muted" style="margin:0 0 10px">이름은 표시되지 않습니다. 소속과 함께 모든 참석자에게 공개됩니다.</p>
+      <textarea id="qin" rows="3" maxlength="300" oninput="onType()"
+        placeholder="무엇이든 편하게 적어주세요."></textarea>
+      <div class="row">
+        <span class="muted" id="cnt">0 / 300</span>
+        <button class="btn" id="qbtn" disabled onclick="postQ()">등록</button>
+      </div>
+    </div>
+
+    ${(()=>{
+      // 한 번이라도 연 문항만 보여준다 (다음 질문이 미리 보이지 않도록)
+      const shown = POLLS.filter(p=> pollStatus(p.id) !== 'wait');
+      if(!shown.length) return '';
+      return `<div class="qhead"><h2>현장 의견</h2>
+          <span class="count">${shown.length}개</span></div>
+        ${shown.map(p=>{
+          const st = pollStatus(p.id), mine = myVote(p.id) !== null;
+          const cta = st==='open' ? (mine ? '결과 보기' : '참여하기') : '결과 보기';
+          return `<button class="pollrow" onclick="openSheet('${p.id}')">
+            <span class="pt">${p.title}</span>
+            <span class="pb">
+              <span class="st st-${st}">${st==='open'?'진행 중':'마감'}</span>
+              <span class="go">${cta} →</span>
+            </span>
+          </button>`;
+        }).join('')}`;
+    })()}
+
+    <div class="qhead">
+      <h2>참석자 질문</h2>
+      <span class="count">전체 ${qs.length} · 사전 ${pre} · 현장 ${qs.length - pre}</span>
+    </div>
+    ${qs.length ? qs.map(qCard).join('') : '<div class="empty">아직 등록된 질문이 없습니다.</div>'}
+  </div>`;
+}
+
+function qCard(q){
+  const a = affOf(q.aff);
+  const isLive = (q.t||0) >= EVENT_START;
+  const mine = state.myQ.includes(q.id);
+  return `<div class="q${mine?' mine':''}">
+    <div class="meta">
+      <span class="chip chip-aff" style="background:${a.color}">${a.name}</span>
+      <span class="chip ${isLive?'chip-live':'chip-pre'}">${isLive?'현장':'사전'}</span>
+      ${mine?'<span class="chip chip-pre">내 질문</span>':''}
+      <span class="time">${q.t ? hhmm(q.t) : ''}</span>
+    </div>
+    <div class="body">${esc(q.text)}</div>
+    ${q.answer ? `<div class="ans"><span class="al">답변</span>${esc(q.answer)}</div>` : ''}
+  </div>`;
+}
+function onType(){
+  const v = document.getElementById('qin').value;
+  document.getElementById('cnt').textContent = `${v.length} / 300`;
+  document.getElementById('qbtn').disabled = v.trim().length < 2;
+}
+async function postQ(){
+  const el = document.getElementById('qin');
+  const text = el.value.trim();
+  if(text.length < 2) return;
+  const btn = document.getElementById('qbtn'); btn.disabled = true;
+  const r = await fetch(url('live/questions'), {
+    method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({ aff: state.myAff, text, t: {'.sv':'timestamp'} }),
+  }).then(x=>x.ok ? x.json() : null).catch(()=>null);
+  if(r && r.name){
+    state.myQ.push(r.name); LS.set('myq', state.myQ);
+    el.value = ''; toast('등록되었습니다.');
+  }else{
+    toast('등록하지 못했습니다. 다시 시도해 주세요.');
+  }
+  render();
+}
+
+/* ---------- 투표 ---------- */
+function viewPoll(id){
+  const p = POLLS.find(x=>x.id===id);
+  const status = pollStatus(id);
+  const mv = myVote(id);
+  const voted = mv !== null, closed = status === 'closed';
+  return `<div class="overlay" id="ov"><div class="sheet">
+    <div class="grip"></div>
+    <div class="top">${closed
+      ? '<span class="closed-label">의견 마감</span>'
+      : '<span class="live-dot"></span><span class="live-label">진행 중</span>'}</div>
+    <h3>${p.title}</h3>
+    ${p.note ? `<p class="qnote">${p.note}</p>` : '<div style="height:10px"></div>'}
+    ${(!voted && !closed) ? `
+      <div class="opts">${p.options.map((o,i)=>
+        `<button class="opt" onclick="vote('${id}',${i})"><span class="sw" style="background:${OPT_COLORS[i]}"></span>${o}</button>`
+      ).join('')}</div>
+      <p class="muted" style="margin:12px 18px 0">한 번만 선택할 수 있습니다.</p>`
+    : `
+      ${voted ? `<div class="done-note">${p.options[mv]} — 제출되었습니다.</div>` : ''}
+      ${results(p, status)}
+      <button class="btn btn-ghost" onclick="closeSheet()">질문판으로 돌아가기</button>`}
+  </div></div>`;
+}
+async function vote(id, i){
+  const p = POLLS.find(x=>x.id===id);
+  if(pollStatus(id) !== 'open' || myVote(id) !== null) return;
+  if(!(i >= 0 && i < p.options.length)) return;
+  await dbPut(`live/polls/${id}/votes/${state.cid}`, { aff: state.myAff, opt: i });
+  render();
+}
+function closeSheet(){ state.openSheet = null; render(); }
+function openSheet(id){ state.openSheet = id; render(); }
+
+/* 소속마다 "가장 많이 고른 답"을 카드로 먼저 보여주고, 전체 분포는 아래에 작게 둔다. */
+function results(p, status){
+  const votes = pollVotes(p);
+  const total = votes.length, closed = status === 'closed';
+  const gm = groupMap(p.id);
+
+  let cards = AFFS.map(a=>{
+    const mine = votes.filter(v=>v.aff===a.id);
+    const counts = p.options.map((_,i)=> mine.filter(v=>v.opt===i).length);
+    const top = Math.max(0, ...counts);
+    const idx = counts.map((c,i)=> c===top && c>0 ? i : -1).filter(i=>i>=0);
+    return { aff:a, letter:gm[a.id], n:mine.length, idx, share: pct(top, mine.length) };
+  });
+  cards.sort(closed ? (x,y)=> y.share - x.share : (x,y)=> x.letter < y.letter ? -1 : 1);
+
+  const byOpt = p.options.map((_,i)=> votes.filter(v=>v.opt===i).length);
+
+  return `<div class="res">
+    <div class="res-sec">
+      <h4>${closed ? '소속별 가장 많은 답' : '그룹별 가장 많은 답'}</h4>
+      <p class="sh">${closed
+        ? '응답 ' + total + '명 · 비율이 높은 순'
+        : '응답 ' + total + '명 · 실시간 집계, 소속은 마감 시 공개됩니다.'}</p>
+      <div class="gcards">
+        ${cards.map(c=>`<div class="gcard">
+          <div class="gh">${closed ? c.aff.name : '그룹 ' + c.letter}</div>
+          ${!c.idx.length ? '<div class="none">응답 없음</div>'
+            : c.idx.length >= 3 ? `<div class="ga" style="color:var(--ink-2)">고르게 갈림</div><div class="gp">${c.n}명 응답</div>`
+            : `<div class="ga" style="color:${c.idx.length>1 ? 'var(--ink)' : OPT_COLORS[c.idx[0]]}">${c.idx.map(i=>p.options[i]).join(' · ')}</div>
+               <div class="gp">${c.share}%</div>`}
+        </div>`).join('')}
+      </div>
+    </div>
+
+    <div class="res-sec">
+      <h4>전체 분포</h4>
+      ${p.options.map((o,i)=>`<div class="rrow">
+        <div class="lbl">
+          <span class="sw" style="background:${OPT_COLORS[i]}"></span>
+          <span class="nm">${o}</span>
+          <span class="val"><b>${byOpt[i]}</b>명 · ${pct(byOpt[i],total)}%</span>
+        </div>
+        <div class="track"><div class="fill" style="width:${pct(byOpt[i],total)}%; background:${OPT_COLORS[i]}"></div></div>
+      </div>`).join('')}
+    </div>
+
+    <div class="reveal-note${closed?' done':''}">
+      ${closed
+        ? '소속이 공개되었습니다. 이 결과는 행사 후 정리하여 참석자 전원에게 공유드립니다.'
+        : '지금은 소속을 가린 그룹으로만 표시됩니다. 마감 시 각 그룹이 어느 소속이었는지 공개됩니다.'}
+    </div>
+  </div>`;
+}
+
+/* ---------- 관리자 ---------- */
+function viewAdmin(){
+  const n = questions().length;
+  return `${header('')}
+  <div class="wrap">
+    <div class="tabs">
+      <button class="tab${state.adminTab==='ops'?' on':''}" onclick="adminTab('ops')">운영</button>
+      <button class="tab${state.adminTab==='q'?' on':''}" onclick="adminTab('q')">질문 ${n}</button>
+    </div>
+    ${state.adminTab==='ops' ? adminOps() : adminQ()}
+  </div>`;
+}
+function adminTab(t){ state.adminTab = t; state.editing = null; render(); }
+
+function adminOps(){
+  const qs = questions();
+  const answered = POLLS.reduce((n,p)=> n + pollVotes(p).length, 0);
+  return `
+    <div class="stat">
+      <div><b>${qs.length}</b><span>등록 질문</span></div>
+      <div><b>${answered}</b><span>누적 응답</span></div>
+      <div><b>${new Set(qs.map(q=>q.aff)).size}</b><span>참여 소속</span></div>
+    </div>
+
+    <p class="card-t" style="margin:0 2px 8px">투표 운영</p>
+    ${POLLS.map((p,i)=>{
+      const st = pollStatus(p.id);
+      const label = {wait:'대기',open:'진행 중',closed:'마감'}[st];
+      return `<div class="pcard">
+        <div class="pt">${i+1}. ${p.title}</div>
+        <div class="prow">
+          <span class="st st-${st}">${label}</span>
+          <span class="muted">${pollVotes(p).length}명 응답</span>
+          <span class="sp"></span>
+          ${st==='wait'   ? `<button class="mini primary" onclick="setStatus('${p.id}','open')">열기</button>`:''}
+          ${st==='open'   ? `<button class="mini" onclick="setStatus('${p.id}','closed')">마감 · 소속 공개</button>`:''}
+          ${st==='closed' ? `<button class="mini" onclick="setStatus('${p.id}','open')">다시 열기</button>`:''}
+        </div>
+      </div>`;
+    }).join('')}
+
+    <div class="hr"></div>
+    <p class="card-t" style="margin:0 2px 8px">설문 링크</p>
+    <div class="pcard"><div class="prow">
+      <span class="st st-${surveyOpen()?'open':'wait'}">${surveyOpen()?'공개 중':'비공개'}</span>
+      <span class="muted">참여자 화면 맨 위에 표시</span>
+      <span class="sp"></span>
+      <button class="mini${surveyOpen()?'':' primary'}" onclick="setSurvey(${!surveyOpen()})">${surveyOpen()?'숨기기':'공개'}</button>
+    </div></div>
+
+    <div class="hr"></div>
+    <p class="card-t" style="margin:0 2px 8px">질문판 문구</p>
+    <div class="pcard"><div class="prow">
+      <span class="st st-${phase()==='live'?'open':'wait'}">${phase()==='live'?'시연 중':'행사 전'}</span>
+      <span class="muted" style="flex-basis:100%">${COMPOSE_T[phase()]}</span>
+      <span class="sp"></span>
+      <button class="mini primary" onclick="setPhase('${phase()==='live'?'pre':'live'}')">
+        ${phase()==='live'?'행사 전 문구로':'시연 중 문구로'}</button>
+    </div></div>
+
+    <div class="hr"></div>
+    <div class="prow" style="margin:0 2px 8px">
+      <p class="card-t" style="margin:0">초기화</p>
+      <span class="sp"></span>
+      <button class="mini" onclick="toggleDz()">${state.dzOpen?'접기':'펼치기'}</button>
+    </div>
+    ${state.dzOpen ? `
+    <p class="muted" style="margin:0 2px 9px">한 번 누르면 확인으로 바뀌고, 다시 눌러야 지워집니다.</p>
+    <div class="dz">
+      ${dzRow('질문만 지우기', 'q')}
+      ${dzRow('투표 결과만 지우기', 'v')}
+      ${dzRow('전부 지우기', 'all')}
+      <div class="dzrow">
+        <span>내 응답 기록 지우기<br><span class="muted">이 기기에서 다시 투표해 보려면</span></span>
+        <button class="mini" onclick="clearMine()">지우기</button>
+      </div>
+    </div>` : ''}
+  `;
+}
+function toggleDz(){ state.dzOpen = !state.dzOpen; state.armed = null; render(); }
+
+/* ---------- 관리자 · 질문 탭 ---------- */
+function adminQ(){
+  const qs = questions();
+  const unanswered = qs.filter(q=> !q.answer && !q.done).length;
+  return `
+    <div class="prow" style="margin:0 2px 10px">
+      <span class="muted">전체 ${qs.length} · 미처리 ${unanswered}</span>
+      <span class="sp"></span>
+      <button class="mini" onclick="copyAll()">전체 복사</button>
+    </div>
+    ${qs.length ? qs.map(adminQCard).join('') : '<div class="empty">아직 등록된 질문이 없습니다.</div>'}
+  `;
+}
+function adminQCard(q){
+  const a = affOf(q.aff);
+  const isLive = (q.t||0) >= EVENT_START;
+  const editing = state.editing === q.id;
+  const draft = state.draft[q.id] !== undefined ? state.draft[q.id] : (q.answer || '');
+  return `<div class="q">
+    <div class="meta">
+      <span class="chip chip-aff" style="background:${a.color}">${a.name}</span>
+      <span class="chip ${isLive?'chip-live':'chip-pre'}">${isLive?'현장':'사전'}</span>
+      ${q.done?'<span class="chip chip-done">처리함</span>':''}
+      <span class="time">${q.t ? hhmm(q.t) : ''}</span>
+    </div>
+    <div class="body">${esc(q.text)}</div>
+    ${q.answer && !editing ? `<div class="ans"><span class="al">답변</span>${esc(q.answer)}</div>` : ''}
+    ${editing ? `
+      <textarea class="ansin" id="ans-${q.id}" rows="3" placeholder="답변을 적어주세요."
+        oninput="state.draft['${q.id}']=this.value">${esc(draft)}</textarea>
+      <div class="prow" style="margin-top:8px">
+        <button class="mini" onclick="cancelAns('${q.id}')">취소</button>
+        <span class="sp"></span>
+        ${q.answer ? `<button class="mini danger" onclick="saveAns('${q.id}', true)">답변 삭제</button>` : ''}
+        <button class="mini primary" onclick="saveAns('${q.id}')">저장</button>
+      </div>`
+    : `<div class="prow" style="margin-top:9px">
+        <button class="mini" onclick="toggleDone('${q.id}', ${!q.done})">${q.done?'처리 해제':'처리함 표시'}</button>
+        <span class="sp"></span>
+        <button class="mini primary" onclick="editAns('${q.id}')">${q.answer?'답변 수정':'답변 달기'}</button>
+      </div>`}
+  </div>`;
+}
+function editAns(id){ state.editing = id; render(); setTimeout(()=>{ const el=document.getElementById('ans-'+id); if(el){ el.focus(); el.setSelectionRange(el.value.length, el.value.length); } },0); }
+function cancelAns(id){ delete state.draft[id]; state.editing = null; render(); }
+async function saveAns(id, remove){
+  const text = remove ? null : (state.draft[id] !== undefined ? state.draft[id].trim() : '');
+  if(!remove && !text){ toast('답변 내용을 적어주세요.'); return; }
+  await dbPut(`live/questions/${id}/answer`, text);
+  if(!remove) await dbPut(`live/questions/${id}/done`, true);
+  delete state.draft[id]; state.editing = null;
+  toast(remove ? '답변을 지웠습니다.' : '답변을 저장했습니다.');
+  render();
+}
+async function toggleDone(id, on){ await dbPut(`live/questions/${id}/done`, !!on); render(); }
+function dzRow(label, key){
+  const armed = state.armed === key;
+  return `<div class="dzrow">
+    <span>${label}</span>
+    <button class="mini danger${armed?' armed':''}" onclick="wipe('${key}')">${armed?'정말 지울까요?':'지우기'}</button>
+  </div>`;
+}
+async function wipe(key){
+  if(state.armed !== key){ state.armed = key; render(); setTimeout(()=>{ if(state.armed===key){ state.armed=null; render(); } }, 5000); return; }
+  state.armed = null;
+  if(key==='q' || key==='all') await dbDel('live/questions');
+  if(key==='v' || key==='all') await dbDel('live/polls');
+  if(key==='all'){ state.seen = {}; LS.set('seen', {}); }
+  toast('지웠습니다.');
+  render();
+}
+function clearMine(){
+  LS.del('myq'); LS.del('seen'); LS.del('cid');
+  state.myQ = []; state.seen = {}; state.cid = clientId();
+  toast('이 기기의 기록을 지웠습니다.');
+  render();
+}
+async function setStatus(id, st){
+  // 한 번에 한 문항만 열리게 한다
+  if(st === 'open'){
+    for(const p of POLLS) if(p.id !== id && pollStatus(p.id) === 'open') await dbPut(`live/polls/${p.id}/status`, 'closed');
+  }
+  await dbPut(`live/polls/${id}/status`, st);
+  render();
+}
+async function setSurvey(on){
+  await dbPut('live/meta/survey', !!on);
+  if(on) await dbPut('live/meta/surveyAt', Date.now());
+  render();
+}
+async function setPhase(p){ await dbPut('live/meta/phase', p); render(); }
+
+function copyAll(){
+  const txt = questions().slice().reverse()
+    .map(q=>`[${q.t?hhmm(q.t):'--:--'}] (${affOf(q.aff).name}) ${q.text}`).join('\n');
+  if(!txt){ toast('복사할 질문이 없습니다.'); return; }
+  const done = ()=> toast(`질문 ${questions().length}건을 복사했습니다.`);
+  const fail = ()=> toast('복사할 수 없어 화면에서 직접 선택해 주세요.');
+  try{ navigator.clipboard.writeText(txt).then(done, fail); }catch(e){ fail(); }
+}
+function toast(msg){
+  const d = document.createElement('div');
+  d.className = 'toast'; d.textContent = msg;
+  document.body.appendChild(d); setTimeout(()=>d.remove(), 2200);
+}
+
+/* ---------- 관리자 진입 ---------- */
+let taps = 0, tapTimer = null;
+function tapLogo(){
+  taps++; clearTimeout(tapTimer);
+  tapTimer = setTimeout(()=>{ taps = 0; }, 1500);
+  if(taps >= 5){
+    taps = 0;
+    if(state.isAdmin) exitAdmin();
+    else { state.isAdmin = true; state.screen = 'admin'; render(); toast('관리자 화면입니다.'); }
+  }
+}
+function exitAdmin(){
+  try{ history.replaceState(null,'',location.pathname + location.search); }catch(e){}
+  state.isAdmin = false;
+  if(state.screen==='admin') state.screen = state.myAff ? 'board' : 'onboard';
+  render(); toast('참여자 화면으로 돌아왔습니다.');
+}
+addEventListener('hashchange', ()=>{
+  state.isAdmin = hashIsAdmin();
+  if(state.isAdmin) state.screen = 'admin';
+  render();
+});
+if(state.isAdmin) state.screen = 'admin';
+
+render();
+connect();
+</script>
+</body>
+</html>
