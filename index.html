@@ -325,7 +325,7 @@ const state = {
   seen: LS.get('seen', {}),   // 자동으로 띄운 적 있는 문항
   openSheet: null,        // 지금 화면에 띄운 문항 id
   isAdmin: hashIsAdmin(), armed: null,
-  adminTab: 'ops', editing: null, dzOpen: false, draft: {},
+  adminTab: 'ops', editing: null, dzOpen: false, draft: {}, qEdit: null,
 };
 
 /* ---------- 유틸 ---------- */
@@ -469,9 +469,11 @@ function render(){
   const closed = POLLS.find(p=> pollStatus(p.id) === 'closed' && state.seen[p.id] === 'open');
   if(closed){ state.openSheet = closed.id; state.seen[closed.id] = 'closed'; LS.set('seen', state.seen); }
 
-  // 작성 중인 질문이 날아가지 않도록 입력 상태를 보존한다
-  const ta = document.getElementById('qin');
-  const keep = ta ? { v: ta.value, s: ta.selectionStart, e: ta.selectionEnd, f: document.activeElement === ta } : null;
+  // 작성 중인 글이 날아가지 않도록 입력 상태를 보존한다
+  const keep = {};
+  document.querySelectorAll('textarea[id]').forEach(t=>{
+    keep[t.id] = { v:t.value, s:t.selectionStart, e:t.selectionEnd, f: document.activeElement === t };
+  });
 
   const app = document.getElementById('app');
   app.className = 'app' + (state.screen==='admin' ? ' adm' : '');
@@ -479,14 +481,16 @@ function render(){
                 : state.screen==='admin'   ? viewAdmin()
                 :                            viewBoard();
 
-  if(keep && keep.v){
-    const el = document.getElementById('qin');
-    if(el){
-      el.value = keep.v;
-      document.getElementById('cnt').textContent = `${keep.v.length} / 300`;
-      document.getElementById('qbtn').disabled = keep.v.trim().length < 2;
-      if(keep.f){ el.focus(); try{ el.setSelectionRange(keep.s, keep.e); }catch(e){} }
-    }
+  Object.keys(keep).forEach(id=>{
+    const el = document.getElementById(id); if(!el) return;
+    const k = keep[id];
+    if(k.v && el.value !== k.v) el.value = k.v;
+    if(k.f){ el.focus(); try{ el.setSelectionRange(k.s, k.e); }catch(e){} }
+  });
+  const qin = document.getElementById('qin');
+  if(qin && qin.value){
+    document.getElementById('cnt').textContent = `${qin.value.length} / 300`;
+    document.getElementById('qbtn').disabled = qin.value.trim().length < 2;
   }
 
   const old = document.getElementById('ov'); if(old) old.remove();
@@ -612,16 +616,55 @@ function qCard(q){
   const a = affOf(q.aff);
   const isLive = (q.t||0) >= EVENT_START;
   const mine = state.myQ.includes(q.id);
+  const editing = state.qEdit === q.id;
   return `<div class="q${mine?' mine':''}">
     <div class="meta">
       <span class="chip chip-aff" style="background:${a.color}">${a.name}</span>
       <span class="chip ${isLive?'chip-live':'chip-pre'}">${isLive?'현장':'사전'}</span>
       ${mine?'<span class="chip chip-pre">내 질문</span>':''}
+      ${q.edited?'<span class="chip chip-pre">수정됨</span>':''}
       <span class="time">${q.t ? hhmm(q.t) : ''}</span>
     </div>
-    <div class="body">${esc(q.text)}</div>
+    ${editing
+      ? `<textarea class="ansin" id="qe-${q.id}" rows="3" maxlength="300">${esc(q.text)}</textarea>
+         <div class="prow" style="margin-top:8px">
+           <button class="mini" onclick="cancelQEdit()">취소</button>
+           <span class="sp"></span>
+           <button class="mini primary" onclick="saveQEdit('${q.id}')">저장</button>
+         </div>`
+      : `<div class="body">${esc(q.text)}</div>`}
     ${q.answer ? `<div class="ans"><span class="al">답변</span>${esc(q.answer)}</div>` : ''}
+    ${(mine && !editing) ? (q.answer
+      ? `<div class="muted" style="margin-top:9px">답변이 달린 질문은 수정할 수 없습니다.</div>`
+      : `<div class="prow" style="margin-top:9px">
+           <span class="sp"></span>
+           <button class="mini" onclick="editQ('${q.id}')">수정</button>
+           <button class="mini danger${state.armed==='del:'+q.id?' armed':''}" onclick="delQ('${q.id}')">${state.armed==='del:'+q.id?'정말 지울까요?':'삭제'}</button>
+         </div>`) : ''}
   </div>`;
+}
+
+function editQ(id){ state.qEdit = id; state.armed = null; render();
+  setTimeout(()=>{ const el=document.getElementById('qe-'+id); if(el){ el.focus(); el.setSelectionRange(el.value.length, el.value.length); } },0); }
+function cancelQEdit(){ state.qEdit = null; render(); }
+async function saveQEdit(id){
+  const el = document.getElementById('qe-'+id);
+  const text = el ? el.value.trim() : '';
+  if(text.length < 2){ toast('내용을 적어주세요.'); return; }
+  await dbPut(`live/questions/${id}/text`, text);
+  await dbPut(`live/questions/${id}/edited`, true);
+  state.qEdit = null; toast('수정했습니다.'); render();
+}
+async function delQ(id){
+  if(state.armed !== 'del:'+id){
+    state.armed = 'del:'+id; render();
+    setTimeout(()=>{ if(state.armed==='del:'+id){ state.armed=null; render(); } }, 5000);
+    return;
+  }
+  state.armed = null;
+  await dbDel(`live/questions/${id}`);
+  state.myQ = state.myQ.filter(x=>x!==id); LS.set('myq', state.myQ);
+  toast('삭제했습니다.'); render();
 }
 function onType(){
   const v = document.getElementById('qin').value;
@@ -853,6 +896,7 @@ function adminQCard(q){
       </div>`
     : `<div class="prow" style="margin-top:9px">
         <button class="mini" onclick="toggleDone('${q.id}', ${!q.done})">${q.done?'처리 해제':'처리함 표시'}</button>
+        <button class="mini danger${state.armed==='adel:'+q.id?' armed':''}" onclick="admDelQ('${q.id}')">${state.armed==='adel:'+q.id?'정말 지울까요?':'질문 삭제'}</button>
         <span class="sp"></span>
         <button class="mini primary" onclick="editAns('${q.id}')">${q.answer?'답변 수정':'답변 달기'}</button>
       </div>`}
@@ -868,6 +912,16 @@ async function saveAns(id, remove){
   delete state.draft[id]; state.editing = null;
   toast(remove ? '답변을 지웠습니다.' : '답변을 저장했습니다.');
   render();
+}
+async function admDelQ(id){
+  if(state.armed !== 'adel:'+id){
+    state.armed = 'adel:'+id; render();
+    setTimeout(()=>{ if(state.armed==='adel:'+id){ state.armed=null; render(); } }, 5000);
+    return;
+  }
+  state.armed = null;
+  await dbDel(`live/questions/${id}`);
+  toast('질문을 삭제했습니다.'); render();
 }
 async function toggleDone(id, on){ await dbPut(`live/questions/${id}/done`, !!on); render(); }
 function dzRow(label, key){
