@@ -266,6 +266,7 @@ button{font-family:inherit; font-size:inherit; cursor:pointer}
 
 const DB_URL = 'https://issafe-testlive-default-rtdb.asia-southeast1.firebasedatabase.app/';
 const IS_TEST = true;   // 테스트 사본 표시
+const BUILD = '2026-10-06c';   // 올릴 때마다 바꾼다. 관리자 화면 맨 아래에 표시된다
 const SURVEY_URL = 'https://naver.me/Gow7xnOp';
 const EVENT_START = Date.parse('2026-10-08T11:00:00+09:00');
 
@@ -287,6 +288,10 @@ const POLLS = [
     title:'함정이 피격당했을 때 가장 우선시되어야 하는 기능은 무엇이라고 보십니까?',
     note:'정답이 있는 문항은 아닙니다.',
     options:['전력','추진','전투체계'] },
+  { id:'qhit',
+    title:'이 중 한 곳이 피격된다면, 어디가 가장 치명적일까요?',
+    note:'잠시 후 해석 결과로 함께 확인하겠습니다.',
+    options:['감속기어실','주 배전반실','전투정보실'] },
   { id:'q3',
     title:'기계식 추진과 전기추진(장비만 교체) 중, 같은 피격에서 생존성이 더 좋을 쪽은?',
     note:'잠시 후 해석 결과로 함께 확인하겠습니다.',
@@ -331,7 +336,15 @@ const state = {
 /* ---------- 유틸 ---------- */
 const esc = s => String(s).replace(/[&<>"]/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const KST = new Intl.DateTimeFormat('ko-KR',{hour:'2-digit',minute:'2-digit',hour12:false,timeZone:'Asia/Seoul'});
+const KSTD = new Intl.DateTimeFormat('en-US',{month:'numeric',day:'numeric',timeZone:'Asia/Seoul'});
+const KSTYMD = new Intl.DateTimeFormat('en-CA',{year:'numeric',month:'2-digit',day:'2-digit',timeZone:'Asia/Seoul'});
 const hhmm = t => KST.format(new Date(t));
+// 오늘 올라온 건 시간만, 다른 날 것은 날짜도 함께
+function when(t){
+  if(!t) return '';
+  const today = KSTYMD.format(new Date());
+  return KSTYMD.format(new Date(t)) === today ? hhmm(t) : KSTD.format(new Date(t)) + ' ' + hhmm(t);
+}
 const pct = (n,d) => d ? Math.round(n/d*100) : 0;
 const LETTERS = ['A','B','C','D'];
 function groupMap(pollId){
@@ -529,7 +542,7 @@ function header(right){
 function viewOnboard(){
   return `<div class="onb">
     <div class="logo" onclick="tapLogo()">is<em>SAFE</em></div>
-    <div class="tag">함정 생존성 통합 설계 프레임워크 · 제1차 시연회</div>
+    <div class="tag">함정 생존성 설계 통합 프레임워크 · 제1차 시연회</div>
     <div class="ask">어느 쪽에서 오셨나요?</div>
     <div class="note">집계에만 사용되며, 화면에는 소속만 표시됩니다.</div>
     <div class="affs">
@@ -623,7 +636,7 @@ function qCard(q){
       <span class="chip ${isLive?'chip-live':'chip-pre'}">${isLive?'현장':'사전'}</span>
       ${mine?'<span class="chip chip-pre">내 질문</span>':''}
       ${q.edited?'<span class="chip chip-pre">수정됨</span>':''}
-      <span class="time">${q.t ? hhmm(q.t) : ''}</span>
+      <span class="time">${when(q.t)}</span>
     </div>
     ${editing
       ? `<textarea class="ansin" id="qe-${q.id}" rows="3" maxlength="300">${esc(q.text)}</textarea>
@@ -854,6 +867,7 @@ function adminOps(){
         <button class="mini" onclick="clearMine()">지우기</button>
       </div>
     </div>` : ''}
+    <p class="muted" style="text-align:center; margin:18px 0 0">버전 ${BUILD}</p>
   `;
 }
 function toggleDz(){ state.dzOpen = !state.dzOpen; state.armed = null; render(); }
@@ -881,7 +895,7 @@ function adminQCard(q){
       <span class="chip chip-aff" style="background:${a.color}">${a.name}</span>
       <span class="chip ${isLive?'chip-live':'chip-pre'}">${isLive?'현장':'사전'}</span>
       ${q.done?'<span class="chip chip-done">처리함</span>':''}
-      <span class="time">${q.t ? hhmm(q.t) : ''}</span>
+      <span class="time">${when(q.t)}</span>
     </div>
     <div class="body">${esc(q.text)}</div>
     ${q.answer && !editing ? `<div class="ans"><span class="al">답변</span>${esc(q.answer)}</div>` : ''}
@@ -963,7 +977,7 @@ async function setPhase(p){ await dbPut('live/meta/phase', p); render(); }
 
 function copyAll(){
   const txt = questions().slice().reverse()
-    .map(q=>`[${q.t?hhmm(q.t):'--:--'}] (${affOf(q.aff).name}) ${q.text}`).join('\n');
+    .map(q=>`[${q.t?when(q.t):'--:--'}] (${affOf(q.aff).name}) ${q.text}`).join('\n');
   if(!txt){ toast('복사할 질문이 없습니다.'); return; }
   const done = ()=> toast(`질문 ${questions().length}건을 복사했습니다.`);
   const fail = ()=> toast('복사할 수 없어 화면에서 직접 선택해 주세요.');
