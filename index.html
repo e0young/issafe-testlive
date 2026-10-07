@@ -13,6 +13,7 @@
   --hdr-1:#003379; --hdr-2:#00265c; --hdr-fg:#ffffff; --hdr-sub:#b7c9e6; --hdr-mark:#8ec5ff;
   --adm-1:#1f2937; --adm-2:#111827;
   --track:#e4e9f1; --picked:#f4f7fd;
+  --sheet-bg:#ffffff; --sheet-card:#f1f4f9;
   --chip-bg:#eef1f6; --chip-fg:#7b8798; --chip-on:#ffffff;
   --live-bg:#ffeceb; --live-fg:#b3261e;
   --good-bg:#e6f4ea; --good-fg:#1d5c33;
@@ -32,6 +33,7 @@
     --hdr-1:#132540; --hdr-2:#0c1a2e; --hdr-fg:#eaf1fb; --hdr-sub:#8ea6c8; --hdr-mark:#8ec5ff;
     --adm-1:#232d3c; --adm-2:#161d28;
     --track:#26313f; --picked:#1b2740;
+    --sheet-bg:#202b3c; --sheet-card:#141b26;
     --chip-bg:#232d3c; --chip-fg:#93a1b4; --chip-on:#0e141f;
     --live-bg:#3a1b19; --live-fg:#ff9a90;
     --good-bg:#12331f; --good-fg:#8fd6a8;
@@ -50,6 +52,7 @@
   --hdr-1:#132540; --hdr-2:#0c1a2e; --hdr-fg:#eaf1fb; --hdr-sub:#8ea6c8; --hdr-mark:#8ec5ff;
   --adm-1:#232d3c; --adm-2:#161d28;
   --track:#26313f; --picked:#1b2740;
+  --sheet-bg:#202b3c; --sheet-card:#141b26;
   --chip-bg:#232d3c; --chip-fg:#93a1b4; --chip-on:#0e141f;
   --live-bg:#3a1b19; --live-fg:#ff9a90;
   --good-bg:#12331f; --good-fg:#8fd6a8;
@@ -174,10 +177,14 @@ button{font-family:inherit; font-size:inherit; cursor:pointer}
 .pollrow .go{margin-left:auto; font-size:12.5px; font-weight:700; color:var(--accent)}
 
 /* poll sheet */
-.overlay{position:fixed; inset:0; z-index:40; background:rgba(9,20,40,.55); display:flex; align-items:flex-end; justify-content:center}
-.sheet{width:100%; max-width:520px; background:var(--bg); border-radius:20px 20px 0 0; max-height:92dvh;
+.overlay{position:fixed; inset:0; z-index:40; background:rgba(9,20,40,.68); display:flex; align-items:flex-end; justify-content:center}
+.sheet{width:100%; max-width:520px; background:var(--sheet-bg); border-radius:20px 20px 0 0; max-height:92dvh;
   overflow-y:auto; animation:rise .28s cubic-bezier(.2,.8,.3,1);
+  box-shadow:0 -10px 40px rgba(0,0,0,.28);
   padding-bottom:calc(20px + env(safe-area-inset-bottom,0px))}
+/* 시트가 밝아진 만큼, 그 안의 카드는 한 톤 눌러 구분이 남게 한다 */
+.sheet .opt, .sheet .gcard{background:var(--sheet-card)}
+.sheet .btn-ghost{background:var(--sheet-card)}
 @keyframes rise{from{transform:translateY(24px); opacity:0} to{transform:none; opacity:1}}
 .sheet .grip{width:38px; height:4px; background:var(--line); border-radius:2px; margin:9px auto 0}
 .sheet .top{padding:14px 18px 0; display:flex; align-items:center; gap:8px}
@@ -244,6 +251,52 @@ button{font-family:inherit; font-size:inherit; cursor:pointer}
 .conn{position:fixed; left:50%; transform:translateX(-50%); bottom:calc(12px + env(safe-area-inset-bottom,0px));
   z-index:70; background:var(--danger); color:#fff; padding:9px 15px; border-radius:999px;
   font-size:12.5px; font-weight:700; box-shadow:0 6px 20px rgba(0,0,0,.25)}
+/* ───────── 넓은 화면(프로젝터·데스크탑) ─────────
+   폰 화면은 그대로 두고, 900px 이상에서만 폭과 글자를 키운다.
+   결과 공개 때 큰 화면에 띄우기 위한 것. */
+@media (min-width: 900px){
+  body{font-size:18px}
+  .app{max-width:760px}
+  .hdr .mark{font-size:21px}
+  .hdr .sub{font-size:13px}
+  .mybadge{font-size:14px; padding:7px 14px}
+  .q .body{font-size:17.5px}
+  .q .meta .chip{font-size:13px; padding:4px 10px}
+  .q .time{font-size:13px}
+  .qhead h2{font-size:17px}
+  .qhead .count{font-size:14px}
+  .pollrow .pt{font-size:17px}
+
+  /* 결과 창은 화면 가운데로 올리고 더 넓게 */
+  .overlay{align-items:center; padding:28px}
+  .sheet{max-width:780px; max-height:88dvh; border-radius:20px;
+         padding-bottom:26px; box-shadow:0 20px 60px rgba(0,0,0,.4)}
+  .sheet .grip{display:none}
+  .sheet .top{padding-top:22px}
+  .sheet h3{font-size:27px; margin-left:26px; margin-right:26px}
+  .sheet .qnote{font-size:15px; margin-left:26px; margin-right:26px}
+  .sheet .top{padding-left:26px; padding-right:26px}
+  .live-label,.closed-label{font-size:14px}
+  .opts{padding:0 26px; gap:11px}
+  .opt{font-size:19px; padding:17px 19px}
+  .done-note{font-size:15px; margin-left:26px; margin-right:26px}
+  .res{padding:4px 26px 22px}
+  .res-sec h4{font-size:15px}
+  .res-sec .sh{font-size:14px}
+  .gcards{gap:12px}
+  .gcard{padding:16px 18px}
+  .gcard .gh{font-size:14px}
+  .gcard .ga{font-size:26px}
+  .gcard .gp{font-size:16px}
+  .rrow .nm{font-size:16.5px}
+  .rrow .val{font-size:15px}
+  .rrow .val b{font-size:19px}
+  .track{height:13px; border-radius:7px}
+  .fill{border-radius:7px}
+  .reveal-note{font-size:14px}
+  .sheet .btn{width:calc(100% - 52px); margin-left:26px; margin-right:26px; font-size:17px}
+}
+
 .toast{position:fixed; left:50%; bottom:70px; transform:translateX(-50%); z-index:99;
   background:#111827; color:#fff; padding:10px 16px; border-radius:10px; font-size:13px;
   box-shadow:0 8px 24px rgba(0,0,0,.35); max-width:calc(100% - 32px); text-align:center}
@@ -266,7 +319,7 @@ button{font-family:inherit; font-size:inherit; cursor:pointer}
 
 const DB_URL = 'https://issafe-testlive-default-rtdb.asia-southeast1.firebasedatabase.app/';
 const IS_TEST = true;   // 테스트 사본 표시
-const BUILD = '2026-10-07a';   // 올릴 때마다 바꾼다. 관리자 화면 맨 아래에 표시된다
+const BUILD = '2026-10-07c';   // 올릴 때마다 바꾼다. 관리자 화면 맨 아래에 표시된다
 const SURVEY_URL = 'https://naver.me/Gow7xnOp';
 const EVENT_START = Date.parse('2026-10-08T11:00:00+09:00');
 
