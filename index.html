@@ -92,8 +92,8 @@ button{font-family:inherit; font-size:inherit; cursor:pointer}
 .hdr .spacer{flex:1}
 .mybadge{background:rgba(255,255,255,.14); border:1px solid rgba(255,255,255,.22); color:var(--hdr-fg);
   border-radius:999px; padding:6px 12px; font-size:12px; font-weight:600; white-space:nowrap; font-family:inherit}
-.adm-tag{background:#f59e0b; color:#1f2937; font-size:11px; font-weight:800; padding:3px 8px; border-radius:6px}
 .test-tag{background:#e0392b; color:#fff; font-size:11px; font-weight:800; padding:3px 8px; border-radius:6px}
+.adm-tag{background:#f59e0b; color:#1f2937; font-size:11px; font-weight:800; padding:3px 8px; border-radius:6px}
 
 /* generic */
 .wrap{padding-block:16px; padding-inline:16px}
@@ -284,10 +284,12 @@ button{font-family:inherit; font-size:inherit; cursor:pointer}
   .res-sec h4{font-size:15px}
   .res-sec .sh{font-size:14px}
   .gcards{gap:12px}
-  .gcard{padding:16px 18px}
-  .gcard .gh{font-size:14px}
-  .gcard .ga{font-size:26px}
-  .gcard .gp{font-size:16px}
+  /* 넓은 화면에서는 답과 비율을 좌우로 벌려 카드 폭을 채운다 */
+  .gcard{padding:15px 20px; display:flex; flex-wrap:wrap; align-items:baseline; column-gap:14px}
+  .gcard .gh{flex-basis:100%; font-size:14px}
+  .gcard .ga{flex:1; min-width:0; font-size:26px; margin-top:5px}
+  .gcard .gp{margin-left:auto; margin-top:0; font-size:22px; color:var(--ink)}
+  .gcard .none{flex-basis:100%; font-size:20px; margin-top:5px}
   .rrow .nm{font-size:16.5px}
   .rrow .val{font-size:15px}
   .rrow .val b{font-size:19px}
@@ -319,7 +321,7 @@ button{font-family:inherit; font-size:inherit; cursor:pointer}
 
 const DB_URL = 'https://issafe-testlive-default-rtdb.asia-southeast1.firebasedatabase.app/';
 const IS_TEST = true;   // 테스트 사본 표시
-const BUILD = '2026-10-07c';   // 올릴 때마다 바꾼다. 관리자 화면 맨 아래에 표시된다
+const BUILD = '2026-10-07e';   // 올릴 때마다 바꾼다. 관리자 화면 맨 아래에 표시된다
 const SURVEY_URL = 'https://naver.me/Gow7xnOp';
 const EVENT_START = Date.parse('2026-10-08T11:00:00+09:00');
 
@@ -605,7 +607,7 @@ function viewOnboard(){
     </div>
     <div class="privacy">
       이름과 연락처는 받지 않습니다. 올리신 질문은 소속과 함께 모든 참석자에게 공개되며,
-      시간 관계상 현장에서 답변드리지 못한 질문은 행사 후 정리하여 회신드립니다.
+      시간 관계상 현장에서 답변드리지 못한 질문은 행사 후 답변 달도록 하겠습니다.
     </div>
     ${state.myAff ? `<button class="btn btn-ghost" style="margin-top:14px" onclick="cancelAff()">취소</button>` : ''}
   </div>`;
@@ -835,11 +837,7 @@ function results(p, status){
       </div>`).join('')}
     </div>
 
-    <div class="reveal-note${closed?' done':''}">
-      ${closed
-        ? '소속이 공개되었습니다. 이 결과는 행사 후 정리하여 참석자 전원에게 공유드립니다.'
-        : '지금은 소속을 가린 그룹으로만 표시됩니다. 마감 시 각 그룹이 어느 소속이었는지 공개됩니다.'}
-    </div>
+    ${closed ? '' : `<div class="reveal-note">지금은 소속을 가린 그룹으로만 표시됩니다. 마감 시 각 그룹이 어느 소속이었는지 공개됩니다.</div>`}
   </div>`;
 }
 
